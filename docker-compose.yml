@@ -1,0 +1,48 @@
+version: "3.3"
+
+volumes:
+    mongo_data:
+    es_data:
+    graylog_data:
+
+services:
+
+  mongo:
+    image: mongo:4.2
+    restart: unless-stopped
+    volumes:
+        - mongo_data:/data/db
+
+  elasticsearch:
+    image: docker.elastic.co/elasticsearch/elasticsearch-oss:7.10.2
+    restart: unless-stopped
+    volumes:
+        - es_data:/usr/share/elasticsearch/data
+    environment:
+      http.host: "0.0.0.0"
+      discovery.type: "single-node"
+      ES_JAVA_OPTS: "-Xms512m -Xmx512m"
+    ulimits:
+        memlock:
+            soft: -1
+            hard: -1
+    deploy:
+        resources:
+            limits:
+                memory: 1gb
+
+  graylog:
+    image: graylog/graylog:4.2
+    restart: unless-stopped
+    volumes:
+      - graylog_data:/usr/share/graylog/data
+    ports:
+      - "9000:9000"
+      - "12201:12201/udp"
+      - "12401:12401/udp"
+      - "1514:1514"
+    environment:
+      GRAYLOG_HTTP_EXTERNAL_URI: "http://127.0.0.1:9000/"
+    depends_on:
+      - elasticsearch
+      - mongo
