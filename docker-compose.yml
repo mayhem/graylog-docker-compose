@@ -4,6 +4,7 @@ volumes:
     mongo_data:
     es_data:
     graylog_data:
+    geoip_data:
 
 services:
 
@@ -36,6 +37,7 @@ services:
     restart: unless-stopped
     volumes:
       - graylog_data:/usr/share/graylog/data
+      - geoip_data:/usr/share/geoip
     ports:
       - "9000:9000"
       - "12201:12201/udp"
